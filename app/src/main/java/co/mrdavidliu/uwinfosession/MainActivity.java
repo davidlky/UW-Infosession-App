@@ -1,49 +1,41 @@
 package co.mrdavidliu.uwinfosession;
 
 import android.app.Activity;
-import android.app.ListFragment;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -63,7 +55,8 @@ public class MainActivity extends AppCompatActivity
      */
     private ArrayList<InfoSession> infosessions = null;
     private static CustomAdapter adapter;
-    private int currentSort = 1;
+    private TreeMap<Character,Integer> alphabet;
+    private TreeMap<String,Integer> dates;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,7 +139,15 @@ public class MainActivity extends AppCompatActivity
             if(!response.equals("")){
                 JSONObject json = new JSONObject(response);
                 infosessions = convertResponse((JSONArray)json.get("data"));
-                adapter = new CustomAdapter(this,infosessions);
+                String[] d = dates.keySet().toArray(new String[0]);
+                for (int i = 1; i<d.length;i++){
+                    dates.put(d[i],dates.get(d[i])+dates.get(d[i-1])+1);
+                }
+                Character[] a = alphabet.keySet().toArray(new Character[0]);
+                for (int i = 1; i<a.length;i++){
+                    alphabet.put(a[i],alphabet.get(a[i])+alphabet.get(a[i-1]));
+                }
+                adapter = new CustomAdapter(this,infosessions,dates,alphabet);
             }
         }catch (Exception e){
             Log.d("MainActivity","Getting API - Failed parse string");
@@ -155,6 +156,21 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<InfoSession> convertResponse (JSONArray input){
         ArrayList<InfoSession> infos = new ArrayList<InfoSession>();
+        dates = new TreeMap<String,Integer>(new Comparator<String>() {
+            public int compare(String o1, String o2) {
+                try {
+                    return (new SimpleDateFormat("MMM").parse(o1)).compareTo((new SimpleDateFormat("MMM").parse(o2)));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                return 0;
+            }
+        });
+        alphabet = new TreeMap<Character,Integer>(new Comparator<Character>() {
+            public int compare(Character o1, Character o2) {
+                return o1.compareTo(o2);
+            }
+        });
         for (int i =0; i< input.length();i++) {
             InfoSession session = new InfoSession();
             try {
@@ -162,8 +178,13 @@ public class MainActivity extends AppCompatActivity
                 session.id = Integer.parseInt((String) info.get("id"));
                 session.description = (String)info.get("description");
                 session.employer = (String)info.get("employer");
+
                 session.location = (String)info.get("location");
                 if(!session.location.equals("")) {
+                    Character a = session.employer.charAt(0);
+
+                    int count = alphabet.containsKey(a) ? alphabet.get(a) : 0;
+                    alphabet.put(a, count + 1);
                     session.website = (String) info.get("website");
                     session.audience = (String) info.get("audience");
                     session.programs = (String) info.get("programs");
@@ -183,12 +204,16 @@ public class MainActivity extends AppCompatActivity
                     };
                     session.start_time = new GregorianCalendar(Integer.parseInt(date[2]), Arrays.asList(months).indexOf(date[0]), Integer.parseInt(date[1]), times[0], times[1]);
                     session.end_time = new GregorianCalendar(Integer.parseInt(date[2]), session.start_time.get(Calendar.MONTH), Integer.parseInt(date[1]), times[2], times[3]);
+
+                    String d = new SimpleDateFormat("MMM").format(session.start_time.getTime());
+
+                    count = dates.containsKey(d) ? dates.get(d) : 0;
+                    dates.put(d, count + 1);
                     infos.add(session);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
         return infos;
     }
@@ -223,8 +248,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void changeList(int choice){
-        if(currentSort!=choice){
-            currentSort = choice;
+        if(adapter.currentSort!=choice){
+            adapter.currentSort = choice;
             if(choice ==0){
                 Collections.sort(adapter.infosessions2, new Comparator<InfoSession>() {
                     public int compare(InfoSession one, InfoSession two) {
@@ -278,7 +303,9 @@ public class MainActivity extends AppCompatActivity
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             //setup calendar
             ListView lv = (ListView) rootView.findViewById(R.id.info_sessions);
+            lv.setFastScrollEnabled(true);
             lv.setAdapter(adapter);
+            lv.setOverScrollMode(View.OVER_SCROLL_NEVER);
             if(lv.getAdapter() == null){
                 lv.setAdapter(adapter);
             }
