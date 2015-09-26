@@ -11,6 +11,7 @@
     <string name="action_example">Change Ordering</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_add">Add to Calendar</string>
     <string name="title_activity_info_session">InfoSessionActivity</string>
 
     <string name="hello_world">Hello world!</string>
