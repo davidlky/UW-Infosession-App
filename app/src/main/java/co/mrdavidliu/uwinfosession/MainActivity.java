@@ -40,6 +40,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity
      */
     private ArrayList<InfoSession> infosessions = null;
     private static CustomAdapter adapter;
+    private int currentSort = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,9 +135,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -163,26 +163,28 @@ public class MainActivity extends AppCompatActivity
                 session.description = (String)info.get("description");
                 session.employer = (String)info.get("employer");
                 session.location = (String)info.get("location");
-                session.website = (String)info.get("website");
-                session.audience = (String)info.get("audience");
-                session.programs = (String)info.get("programs");
-                //parse for time and date
-                String[] months = new String[]{
-                  "January","February","March","April","May","June","July","August","September","October","November","December"
-                };
-                String[] date = ((String)info.get("date")).split(" ");
-                date[1] = date[1].substring(0,date[1].length()-1);
-                String time1 = (String)info.get("start_time");
-                String time2 = (String)info.get("end_time");
-                int[] times = new int[]{
-                        Integer.parseInt(time1.substring(0,time1.indexOf(':')))+((time1.substring(time1.length()-2).equals("PM"))?12:0),
-                        Integer.parseInt(time1.substring(time1.indexOf(':')+1,time1.indexOf(' '))),
-                        Integer.parseInt(time2.substring(0,time2.indexOf(':')))+((time2.substring(time2.length()-2).equals("PM"))?12:0),
-                        Integer.parseInt(time2.substring(time2.indexOf(':')+1,time2.indexOf(' ')))
-                };
-                session.start_time = new GregorianCalendar(Integer.parseInt(date[2]),Arrays.asList(months).indexOf(date[0])+1,Integer.parseInt(date[1]),times[0],times[1]);
-                session.end_time = new GregorianCalendar(Integer.parseInt(date[2]),session.start_time.get(Calendar.MONTH),Integer.parseInt(date[1]),times[2],times[3]);
-                infos.add(session);
+                if(!session.location.equals("")) {
+                    session.website = (String) info.get("website");
+                    session.audience = (String) info.get("audience");
+                    session.programs = (String) info.get("programs");
+                    //parse for time and date
+                    String[] months = new String[]{
+                            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+                    };
+                    String[] date = ((String) info.get("date")).split(" ");
+                    date[1] = date[1].substring(0, date[1].length() - 1);
+                    String time1 = (String) info.get("start_time");
+                    String time2 = (String) info.get("end_time");
+                    int[] times = new int[]{
+                            Integer.parseInt(time1.substring(0, time1.indexOf(':'))) + ((time1.substring(time1.length() - 2).equals("PM")) ? 12 : 0),
+                            Integer.parseInt(time1.substring(time1.indexOf(':') + 1, time1.indexOf(' '))),
+                            Integer.parseInt(time2.substring(0, time2.indexOf(':'))) + ((time2.substring(time2.length() - 2).equals("PM")) ? 12 : 0),
+                            Integer.parseInt(time2.substring(time2.indexOf(':') + 1, time2.indexOf(' ')))
+                    };
+                    session.start_time = new GregorianCalendar(Integer.parseInt(date[2]), Arrays.asList(months).indexOf(date[0]), Integer.parseInt(date[1]), times[0], times[1]);
+                    session.end_time = new GregorianCalendar(Integer.parseInt(date[2]), session.start_time.get(Calendar.MONTH), Integer.parseInt(date[1]), times[2], times[3]);
+                    infos.add(session);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -197,7 +199,7 @@ public class MainActivity extends AppCompatActivity
         protected String doInBackground(String... params) {
             try {
                 StringBuilder response  = new StringBuilder();
-                URL url = new URL("http://api.uwaterloo.ca/v2/terms/1141/infosessions.json?key="+getString(R.string.waterlooapi));
+                URL url = new URL("https://api.uwaterloo.ca/v2/resources/infosessions.json?key="+getString(R.string.waterlooapi));
                 // Starts the query
 
                 HttpURLConnection httpconn = (HttpURLConnection)url.openConnection();
@@ -220,6 +222,29 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void changeList(int choice){
+        if(currentSort!=choice){
+            currentSort = choice;
+            if(choice ==0){
+                Collections.sort(adapter.infosessions2, new Comparator<InfoSession>() {
+                    public int compare(InfoSession one, InfoSession two) {
+                        return one.employer.compareTo(two.employer);
+                    }
+                });
+                adapter.infosessions = adapter.infosessions2;
+                adapter.notifyDataSetChanged();
+            }else{
+                Collections.sort(adapter.infosessions2, new Comparator<InfoSession>() {
+                    public int compare(InfoSession one, InfoSession two) {
+                        return one.start_time.compareTo(two.start_time);
+                    }
+                });
+                adapter.infosessions = adapter.infosessions2;
+                adapter.notifyDataSetChanged();
+
+            }
+        }
+    }
 
 
     /**

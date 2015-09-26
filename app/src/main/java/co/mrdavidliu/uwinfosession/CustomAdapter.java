@@ -1,6 +1,7 @@
 package co.mrdavidliu.uwinfosession;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 
 import org.json.JSONArray;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -20,8 +22,8 @@ public class CustomAdapter extends BaseAdapter {
 
     Context mContext;
     LayoutInflater inflater;
-    private ArrayList<InfoSession> infosessions;
-    private ArrayList<InfoSession> infosessions2;
+    ArrayList<InfoSession> infosessions;
+    ArrayList<InfoSession> infosessions2;
 
     /**
      * Constructor
@@ -66,7 +68,6 @@ public class CustomAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.list_item, null);
             // Locate the TextViews in listview_item.xml
             holder.company = (TextView) convertView.findViewById(R.id.company_name);
-            holder.programs = (TextView) convertView.findViewById(R.id.programs);
             holder.date = (TextView) convertView.findViewById(R.id.date);
             holder.location = (TextView) convertView.findViewById(R.id.location);
             convertView.setTag(holder);
@@ -76,8 +77,8 @@ public class CustomAdapter extends BaseAdapter {
         // Set the results into TextViews
         holder.company.setText(infosessions.get(position).employer);
         holder.location.setText(infosessions.get(position).location);
-        holder.date.setText(infosessions.get(position).start_time.get(Calendar.DATE)+": "+infosessions.get(position).start_time.getTime() + " - " + infosessions.get(position).end_time.getTime());
-        holder.programs.setText(infosessions.get(position).programs);
+        holder.date.setText(Html.fromHtml("<i>"+new SimpleDateFormat("EEE MMM dd'</i><br>'HH:mm - ").format(infosessions.get(position).start_time.getTime())
+                + new SimpleDateFormat("HH:mm").format(infosessions.get(position).end_time.getTime())));
         // Listen for ListView Item Click
         convertView.setOnClickListener(new View.OnClickListener() {
 
