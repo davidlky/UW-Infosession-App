@@ -300,17 +300,21 @@ public class MainActivity extends AppCompatActivity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            View rootView;
             //setup calendar
-            ListView lv = (ListView) rootView.findViewById(R.id.info_sessions);
-            lv.setFastScrollEnabled(true);
-            lv.setAdapter(adapter);
-            lv.setOverScrollMode(View.OVER_SCROLL_NEVER);
-            if(lv.getAdapter() == null){
+            if (getArguments().getInt(ARG_SECTION_NUMBER)==1) {
+                rootView = inflater.inflate(R.layout.fragment_main, container, false);
+                ListView lv = (ListView) rootView.findViewById(R.id.info_sessions);
+                lv.setFastScrollEnabled(true);
                 lv.setAdapter(adapter);
-            }
-            else{
-                adapter.notifyDataSetChanged();
+                lv.setOverScrollMode(View.OVER_SCROLL_NEVER);
+                if (lv.getAdapter() == null) {
+                    lv.setAdapter(adapter);
+                } else {
+                    adapter.notifyDataSetChanged();
+                }
+            }else{
+                rootView = inflater.inflate(R.layout.fragment_calendar_view, container, false);
             }
             return rootView;
         }
