@@ -19,6 +19,8 @@ import android.widget.ListAdapter;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -71,6 +73,10 @@ public class FlatCalendar extends LinearLayout {
             textView.setPadding(5,10,5,10);
             b.addView(textView);
         }
+        ArrayList<String> dates = new ArrayList<>();
+        for (int i = 0; i<42; i++){
+            dates.add((i+1)+"");
+        }
         TextView title = new TextView(this.getContext());
         title.setText("Month");
         title.setTextSize(18f);
@@ -78,71 +84,11 @@ public class FlatCalendar extends LinearLayout {
         main.addView(title);
         main.addView(b);
         this.addView(main);
-        gridView.setNumColumns(7);
+        gridView = new GridView(this.getContext());
+        gridView.setAdapter(new GridAdapter(dates,getContext()));
+                gridView.setNumColumns(7);
         gridView.setLayoutParams(new GridLayout.LayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 240)));
-        gridView.setAdapter(new ListAdapter() {
-            @Override
-            public boolean areAllItemsEnabled() {
-                return false;
-            }
-
-            @Override
-            public boolean isEnabled(int position) {
-                return false;
-            }
-
-            @Override
-            public void registerDataSetObserver(DataSetObserver observer) {
-
-            }
-
-            @Override
-            public void unregisterDataSetObserver(DataSetObserver observer) {
-
-            }
-
-            @Override
-            public int getCount() {
-                return 0;
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return null;
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return 0;
-            }
-
-            @Override
-            public boolean hasStableIds() {
-                return false;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                return null;
-            }
-
-            @Override
-            public int getItemViewType(int position) {
-                return 0;
-            }
-
-            @Override
-            public int getViewTypeCount() {
-                return 0;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return false;
-            }
-        });
         this.addView(gridView);
-        updateCalendar();
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.FlatCalendar, defStyle, 0);
@@ -184,6 +130,78 @@ public class FlatCalendar extends LinearLayout {
 //        mTextHeight = fontMetrics.bottom;
     }
 
+    class GridAdapter implements ListAdapter {
+
+        Context c;
+        ArrayList<String> dates;
+        public GridAdapter(ArrayList<String>dates, Context context){
+            this.dates = dates;
+            c = context;
+        }
+        @Override
+        public boolean areAllItemsEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return false;
+        }
+
+        @Override
+        public void registerDataSetObserver(DataSetObserver observer) {
+
+        }
+
+        @Override
+        public void unregisterDataSetObserver(DataSetObserver observer) {
+
+        }
+
+        @Override
+        public int getCount() {
+            return dates.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return false;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView t = new TextView(c);
+            t.setText(dates.get(position));
+            parent.addView(t);
+            return null;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return 0;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -210,26 +228,6 @@ public class FlatCalendar extends LinearLayout {
 //                    paddingLeft + contentWidth, paddingTop + contentHeight);
 //            mExampleDrawable.draw(canvas);
 //        }
-    }
-
-    private void updateCalendar()
-    {
-        ArrayList<Date> cells = new ArrayList<>();
-        Calendar calendar = new GregorianCalendar(Calendar.YEAR,Calendar.MONTH,Calendar.DAY_OF_MONTH);
-
-        // determine the cell for current month's beginning
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        int monthBeginningCell = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-        // move calendar backwards to the beginning of the week
-        calendar.add(Calendar.DAY_OF_MONTH, -monthBeginningCell);
-
-        // fill cells (42 days calendar as per our business logic)
-        while (cells.size() < calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-        {
-            cells.add(calendar.getTime());
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-        }
     }
 //
 //    /**

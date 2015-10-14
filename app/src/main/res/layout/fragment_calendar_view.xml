@@ -5,13 +5,18 @@
     android:layout_height="match_parent">
 
 
-    <co.mrdavidliu.uwinfosession.FlatCalendar android:background="#ccc" android:layout_width="fill_parent"
-        android:layout_height="250dp" android:paddingLeft="20dp" android:paddingBottom="40dp">
-    </co.mrdavidliu.uwinfosession.FlatCalendar>
+    <!--<co.mrdavidliu.uwinfosession.FlatCalendar android:background="#ccc" android:layout_width="fill_parent"-->
+        <!--android:layout_height="250dp" android:paddingLeft="20dp" android:paddingBottom="40dp">-->
+    <!--</co.mrdavidliu.uwinfosession.FlatCalendar>-->
+
+    <CalendarView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:id="@+id/calendarView" />
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listView"
+        android:id="@+id/info_sessions"
         android:layout_gravity="center_horizontal" />
 </LinearLayout>

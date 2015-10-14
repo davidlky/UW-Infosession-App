@@ -315,6 +315,14 @@ public class MainActivity extends AppCompatActivity
                 }
             }else{
                 rootView = inflater.inflate(R.layout.fragment_calendar_view, container, false);
+                ListView lv = (ListView) rootView.findViewById(R.id.info_sessions);
+                lv.setAdapter(adapter);
+                lv.setOverScrollMode(View.OVER_SCROLL_NEVER);
+                if (lv.getAdapter() == null) {
+                    lv.setAdapter(adapter);
+                } else {
+                    adapter.notifyDataSetChanged();
+                }
             }
             return rootView;
         }
