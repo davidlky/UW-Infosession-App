@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TreeMap;
 
@@ -118,15 +119,15 @@ public class CustomAdapter extends BaseAdapter implements SectionIndexer {
         // Set the results into TextViews
         holder.company.setText(infosessions.get(position).employer);
         holder.location.setText(infosessions.get(position).location);
-        holder.date.setText(Html.fromHtml("<i>"+new SimpleDateFormat("EEE MMM dd'</i><br>'HH:mm - ").format(infosessions.get(position).start_time.getTime())
+        holder.date.setText(Html.fromHtml("<i>" + new SimpleDateFormat("EEE, MMM dd'</i><br>'HH:mm - ").format(infosessions.get(position).start_time.getTime())
                 + new SimpleDateFormat("HH:mm").format(infosessions.get(position).end_time.getTime())));
         // Listen for ListView Item Click
         convertView.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-                Intent intent = new Intent(mContext,InfoSessionActivity.class);
-                intent.putExtra("infosession",infosessions.get(position));
+                Intent intent = new Intent(mContext, InfoSessionActivity.class);
+                intent.putExtra("infosession", infosessions.get(position));
                 mContext.startActivity(intent);
             }
         });
@@ -146,6 +147,22 @@ public class CustomAdapter extends BaseAdapter implements SectionIndexer {
             for (InfoSession info : infosessions2) {
                 if (info.employer.toLowerCase(Locale.getDefault())
                         .contains(charText)) {
+                    infosessions.add(info);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+
+    // Filter by company
+    public void filter_date(int year, int month, int day) {
+        infosessions.clear();
+        if (year == 0) {
+            infosessions.addAll(infosessions2);
+        } else {
+            for (InfoSession info : infosessions2) {
+                if (info.start_time.get(Calendar.YEAR)==year&&info.start_time.get(Calendar.MONTH)==month&&info.start_time.get(Calendar.DAY_OF_MONTH)==day){
                     infosessions.add(info);
                 }
             }

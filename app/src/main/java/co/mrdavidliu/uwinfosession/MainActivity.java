@@ -15,9 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CalendarView;
 import android.widget.ListView;
+import android.widget.Toast;
 
-import com.roomorama.caldroid.CaldroidFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -208,6 +209,12 @@ public class MainActivity extends AppCompatActivity
                     session.start_time = new GregorianCalendar(Integer.parseInt(date[2]), Arrays.asList(months).indexOf(date[0]), Integer.parseInt(date[1]), times[0], times[1]);
                     session.end_time = new GregorianCalendar(Integer.parseInt(date[2]), session.start_time.get(Calendar.MONTH), Integer.parseInt(date[1]), times[2], times[3]);
 
+                    int year = Integer.parseInt(date[2]);
+                    session.start_time.set(Calendar.ERA,GregorianCalendar.AD);
+                    session.start_time.set(Calendar.YEAR,Integer.parseInt(date[2]));
+                    session.end_time.set(Calendar.ERA,GregorianCalendar.AD);
+                    session.end_time.set(Calendar.YEAR,Integer.parseInt(date[2]));
+
                     String d = new SimpleDateFormat("MMM").format(session.start_time.getTime());
 
                     count = dates.containsKey(d) ? dates.get(d) : 0;
@@ -326,6 +333,15 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     adapter.notifyDataSetChanged();
                 }
+                GregorianCalendar c = new GregorianCalendar();
+                adapter.filter_date(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
+                CalendarView cal  = (CalendarView) rootView.findViewById(R.id.calendarView);
+                cal.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+                    @Override
+                    public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
+                        adapter.filter_date(year,month,dayOfMonth);
+                    }
+                });
             }
             return rootView;
         }
