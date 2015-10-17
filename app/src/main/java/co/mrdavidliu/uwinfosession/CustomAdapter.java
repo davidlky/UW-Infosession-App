@@ -3,16 +3,12 @@ package co.mrdavidliu.uwinfosession;
 import android.content.Context;
 import android.content.Intent;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONArray;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -162,7 +158,9 @@ public class CustomAdapter extends BaseAdapter implements SectionIndexer {
             infosessions.addAll(infosessions2);
         } else {
             for (InfoSession info : infosessions2) {
-                if (info.start_time.get(Calendar.YEAR)==year&&info.start_time.get(Calendar.MONTH)==month&&info.start_time.get(Calendar.DAY_OF_MONTH)==day){
+                if (year ==-1){
+                    infosessions.add(info);
+                }else if (info.start_time.get(Calendar.YEAR)==year&&info.start_time.get(Calendar.MONTH)==month&&info.start_time.get(Calendar.DAY_OF_MONTH)==day){
                     infosessions.add(info);
                 }
             }
@@ -186,5 +184,14 @@ public class CustomAdapter extends BaseAdapter implements SectionIndexer {
             }
         }
         notifyDataSetChanged();
+    }
+
+    public int getPositionForDate(GregorianCalendar date){
+        for(int  i = dates.get(new SimpleDateFormat("MMM").format(date.getTime())); i>0; i--){
+            if(infosessions.get(i).start_time.get(Calendar.DAY_OF_MONTH)==date.get(Calendar.DAY_OF_MONTH)-1){
+                return i+1;
+            }
+        }
+        return 0;
     }
 }

@@ -17,8 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CalendarView;
 import android.widget.ListView;
-import android.widget.Toast;
 
+import com.roomorama.caldroid.CaldroidFragment;
+import com.roomorama.caldroid.CaldroidListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,10 +37,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -117,8 +117,13 @@ public class MainActivity extends AppCompatActivity
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
+            if((mNavigationDrawerFragment.getArguments() != null) || (mNavigationDrawerFragment.getArguments().getInt("section_number") == 1)) {
+                getMenuInflater().inflate(R.menu.main, menu);
+                restoreActionBar();
+            }else{
+                getMenuInflater().inflate(R.menu.calendar, menu);
+                restoreActionBar();
+            }
             return true;
         }
         return super.onCreateOptionsMenu(menu);
@@ -209,7 +214,6 @@ public class MainActivity extends AppCompatActivity
                     session.start_time = new GregorianCalendar(Integer.parseInt(date[2]), Arrays.asList(months).indexOf(date[0]), Integer.parseInt(date[1]), times[0], times[1]);
                     session.end_time = new GregorianCalendar(Integer.parseInt(date[2]), session.start_time.get(Calendar.MONTH), Integer.parseInt(date[1]), times[2], times[3]);
 
-                    int year = Integer.parseInt(date[2]);
                     session.start_time.set(Calendar.ERA,GregorianCalendar.AD);
                     session.start_time.set(Calendar.YEAR,Integer.parseInt(date[2]));
                     session.end_time.set(Calendar.ERA,GregorianCalendar.AD);
@@ -304,8 +308,6 @@ public class MainActivity extends AppCompatActivity
             return fragment;
         }
 
-        public PlaceholderFragment() {
-        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -323,7 +325,12 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     adapter.notifyDataSetChanged();
                 }
+                adapter.filter_date(-1,1,1);
+                if(adapter.currentSort==1) {
+                    lv.setSelection(adapter.getPositionForDate(new GregorianCalendar()));
+                }
             }else{
+                ((MainActivity)getActivity()).changeList(1);
                 rootView = inflater.inflate(R.layout.fragment_calendar_view, container, false);
                 ListView lv = (ListView) rootView.findViewById(R.id.info_sessions);
                 lv.setAdapter(adapter);
@@ -334,12 +341,22 @@ public class MainActivity extends AppCompatActivity
                     adapter.notifyDataSetChanged();
                 }
                 GregorianCalendar c = new GregorianCalendar();
-                adapter.filter_date(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
-                CalendarView cal  = (CalendarView) rootView.findViewById(R.id.calendarView);
-                cal.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+                adapter.filter_date(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+                CaldroidFragment caldroidFragment = new CaldroidFragment();
+                Bundle args = new Bundle();
+                Calendar cal = Calendar.getInstance();
+                args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
+                args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
+                caldroidFragment.setArguments(args);
+
+                FragmentTransaction t = getActivity().getSupportFragmentManager().beginTransaction();
+                t.replace(R.id.calendarView, caldroidFragment);
+                t.commit();
+                caldroidFragment.setCaldroidListener(new CaldroidListener() {
                     @Override
-                    public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-                        adapter.filter_date(year,month,dayOfMonth);
+                    public void onSelectDate(Date date, View view) {
+                        adapter.filter_date(date.,month,dayOfMonth);
+
                     }
                 });
             }
