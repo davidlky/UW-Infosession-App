@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
-            if((mNavigationDrawerFragment.getArguments() != null) || (mNavigationDrawerFragment.getArguments().getInt("section_number") == 1)) {
+            if((mNavigationDrawerFragment.getArguments() != null) && (mNavigationDrawerFragment.getArguments().getInt("section_number") == 1)) {
                 getMenuInflater().inflate(R.menu.main, menu);
                 restoreActionBar();
             }else{
@@ -231,6 +231,7 @@ public class MainActivity extends AppCompatActivity
         return infos;
     }
 
+
     private class SetupCalendar extends AsyncTask<String, Void, String>{
 
         @Override
@@ -341,24 +342,9 @@ public class MainActivity extends AppCompatActivity
                 }
                 GregorianCalendar c = new GregorianCalendar();
                 adapter.filter_date(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-                CaldroidFragment caldroidFragment = new CaldroidFragment();
-                Bundle args = new Bundle();
-                Calendar cal = Calendar.getInstance();
-                args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
-                args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
-                caldroidFragment.setArguments(args);
+                BackgroundChange asyncTask = new BackgroundChange();
+                asyncTask.execute();
 
-                FragmentTransaction t = getActivity().getSupportFragmentManager().beginTransaction();
-                t.replace(R.id.calendarView, caldroidFragment);
-                t.commit();
-                caldroidFragment.setCaldroidListener(new CaldroidListener() {
-                    @Override
-                    public void onSelectDate(Date date, View view) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(date);
-                        adapter.filter_date(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH));
-                    }
-                });
             }
             return rootView;
         }
@@ -368,6 +354,34 @@ public class MainActivity extends AppCompatActivity
             super.onAttach(activity);
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
+        }
+
+        private class BackgroundChange extends AsyncTask<Void, Void, Void> {
+            @Override
+            protected Void doInBackground(Void... params) {
+                CaldroidFragment caldroidFragment = new CaldroidFragment();
+                Bundle args = new Bundle();
+                Calendar cal = Calendar.getInstance();
+                args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
+                args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
+                args.putInt(CaldroidFragment.THEME_RESOURCE, com.caldroid.R.style.CaldroidDefaultDark);
+                caldroidFragment.setArguments(args);
+
+                FragmentTransaction t = getActivity().getSupportFragmentManager().beginTransaction();
+                //t.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right);
+
+                t.replace(R.id.calendarView, caldroidFragment);
+                t.commit();
+                caldroidFragment.setCaldroidListener(new CaldroidListener() {
+                    @Override
+                    public void onSelectDate(Date date, View view) {
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(date);
+                        adapter.filter_date(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+                    }
+                });
+                return null;
+            }
         }
     }
 
