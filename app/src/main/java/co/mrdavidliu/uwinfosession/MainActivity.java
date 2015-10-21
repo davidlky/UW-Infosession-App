@@ -359,12 +359,14 @@ public class MainActivity extends AppCompatActivity
         private class BackgroundChange extends AsyncTask<Void, Void, Void> {
             @Override
             protected Void doInBackground(Void... params) {
-                CaldroidFragment caldroidFragment = new CaldroidFragment();
+                CalendarFragment caldroidFragment = new CalendarFragment();
                 Bundle args = new Bundle();
                 Calendar cal = Calendar.getInstance();
                 args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
                 args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
+                args.putBoolean(CaldroidFragment.SQUARE_TEXT_VIEW_CELL, false);
                 args.putInt(CaldroidFragment.THEME_RESOURCE, com.caldroid.R.style.CaldroidDefaultDark);
+                args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, false);
                 caldroidFragment.setArguments(args);
 
                 FragmentTransaction t = getActivity().getSupportFragmentManager().beginTransaction();
