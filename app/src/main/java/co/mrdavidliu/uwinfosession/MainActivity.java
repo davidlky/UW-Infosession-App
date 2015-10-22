@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.roomorama.caldroid.CaldroidFragment;
+import com.roomorama.caldroid.CaldroidGridAdapter;
 import com.roomorama.caldroid.CaldroidListener;
 
 import org.json.JSONArray;
@@ -38,6 +39,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity
@@ -58,8 +60,10 @@ public class MainActivity extends AppCompatActivity
      */
     private ArrayList<InfoSession> infosessions = null;
     private static CustomAdapter adapter;
+    private static CalendarGridAdapter cal_adapter;
     private TreeMap<Character,Integer> alphabet;
     private TreeMap<String,Integer> dates;
+    private static TreeMap<Date,Integer> calendar_count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,6 +183,7 @@ public class MainActivity extends AppCompatActivity
                 return o1.compareTo(o2);
             }
         });
+        calendar_count = new TreeMap<>();
         for (int i =0; i< input.length();i++) {
             InfoSession session = new InfoSession();
             try {
@@ -217,7 +222,12 @@ public class MainActivity extends AppCompatActivity
                     session.start_time.set(Calendar.YEAR,Integer.parseInt(date[2]));
                     session.end_time.set(Calendar.ERA,GregorianCalendar.AD);
                     session.end_time.set(Calendar.YEAR,Integer.parseInt(date[2]));
-
+                    Date currdate = new Date(session.start_time.get(Calendar.YEAR),session.start_time.get(Calendar.MONTH),session.start_time.get(Calendar.DAY_OF_MONTH));
+                    if(!calendar_count.containsKey(currdate)) {
+                        calendar_count.put(currdate, 1);
+                    }else{
+                        calendar_count.put(currdate, calendar_count.get(currdate)+1);
+                    }
                     String d = new SimpleDateFormat("MMM").format(session.start_time.getTime());
 
                     count = dates.containsKey(d) ? dates.get(d) : 0;
@@ -357,14 +367,16 @@ public class MainActivity extends AppCompatActivity
         }
 
         private class BackgroundChange extends AsyncTask<Void, Void, Void> {
+            final CalendarFragment caldroidFragment = new CalendarFragment();
+
             @Override
             protected Void doInBackground(Void... params) {
-                CalendarFragment caldroidFragment = new CalendarFragment();
                 Bundle args = new Bundle();
                 Calendar cal = Calendar.getInstance();
                 args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
                 args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
                 args.putBoolean(CaldroidFragment.SQUARE_TEXT_VIEW_CELL, false);
+                args.putInt(CaldroidFragment.THEME_RESOURCE, CalendarFragment.STYLE_NO_FRAME);
                 args.putInt(CaldroidFragment.THEME_RESOURCE, com.caldroid.R.style.CaldroidDefaultDark);
                 args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, false);
                 caldroidFragment.setArguments(args);
@@ -377,6 +389,9 @@ public class MainActivity extends AppCompatActivity
                 caldroidFragment.setCaldroidListener(new CaldroidListener() {
                     @Override
                     public void onSelectDate(Date date, View view) {
+                        caldroidFragment.clearSelectedDates();
+                        caldroidFragment.setSelectedDate(date);
+                        caldroidFragment.refreshView();
                         Calendar c = Calendar.getInstance();
                         c.setTime(date);
                         adapter.filter_date(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
@@ -386,5 +401,18 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+    public static class CalendarFragment extends CaldroidFragment {
+
+        @Override
+        public CaldroidGridAdapter getNewDatesGridAdapter(int month, int year) {
+            // TODO Auto-generated method stub
+            cal_adapter = new CalendarGridAdapter(getActivity(), month, year,
+                    getCaldroidData(), extraData,calendar_count);
+            return cal_adapter;
+        }
+
+    }
+
 
 }

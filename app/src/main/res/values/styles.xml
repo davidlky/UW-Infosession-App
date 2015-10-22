@@ -15,6 +15,8 @@
 
     <style name="CaldroidDefaultDarkCalendarViewLayout">
         <item name="android:background">#efefef</item>
+        <item name="android:dividerHeight">0dp</item>
+        <item name="android:dividerPadding">0dp</item>
     </style>
 
     <style name="CaldroidDefaultDarkMonthName" parent="CaldroidDefaultMonthName">
@@ -22,16 +24,18 @@
     </style>
 
     <style name="CaldroidDefaultDarkGridView" parent="CaldroidDefaultGridView">
+        <item name="android:dividerPadding">0dp</item>
         <item name="android:background">#efefef</item>
     </style>
 
     <style name="CaldroidDefaultDarkCell" parent="CaldroidDefaultCell">
+        <item name="android:dividerPadding">0dp</item>
         <item name="android:textColor">@color/cell_text_color_dark</item>
-        <item name="android:background">@drawable/cell_bg_dark</item>
-        <item name="android:height">3dp</item>
+        <item name="android:background">@drawable/background_cell_calendar</item>
     </style>
 
     <style name="CaldroidDefaultDarkNormalCell" parent="CaldroidDefaultDarkCell">
+        <item name="android:dividerPadding">0dp</item>
         <item name="android:padding">0dp</item>
     </style>
 

@@ -25,7 +25,7 @@ public class InfoSessionActivity extends AppCompatActivity {
                 + new SimpleDateFormat("HH:mm").format(infoSession.end_time.getTime())));
         ((TextView)findViewById(R.id.location)).setText(infoSession.location);
         ((TextView)findViewById(R.id.audience)).setText(infoSession.audience);
-        ((TextView)findViewById(R.id.description)).setText(infoSession.description);
+        ((TextView)findViewById(R.id.description)).setText(infoSession.description.replaceAll("br[ ]?/","\n"));
         setTitle(infoSession.employer);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

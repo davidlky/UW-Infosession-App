@@ -1,27 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical">
+    android:orientation="vertical" android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical"
+    android:id="@+id/linear_layout_1"
+    android:background="#fff">
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:background="@drawable/cell_bg_dark"
         android:layout_gravity="center"
         android:gravity="center_horizontal|fill_vertical"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp">
+        android:layout_marginBottom="4dp"
+        android:id="@+id/background_circle">
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="1"
             android:id="@+id/date"
             android:textColor="#fff"
-            android:gravity="center_vertical" />
+            android:gravity="center_vertical"
+            android:paddingTop="2dp" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="12dp"
+            android:id="@+id/dots"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal">
+
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
