@@ -39,7 +39,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity
@@ -153,7 +152,7 @@ public class MainActivity extends AppCompatActivity
                 infosessions = convertResponse((JSONArray)json.get("data"));
                 String[] d = dates.keySet().toArray(new String[0]);
                 for (int i = 1; i<d.length;i++){
-                    dates.put(d[i],dates.get(d[i])+dates.get(d[i-1])+1);
+                    dates.put(d[i],dates.get(d[i])+dates.get(d[i-1]));
                 }
                 Character[] a = alphabet.keySet().toArray(new Character[0]);
                 for (int i = 1; i<a.length;i++){

@@ -188,7 +188,7 @@ public class CustomAdapter extends BaseAdapter implements SectionIndexer {
 
     public int getPositionForDate(GregorianCalendar date){
         for(int  i = dates.get(new SimpleDateFormat("MMM").format(date.getTime())); i>0; i--){
-            if(infosessions.get(i).start_time.get(Calendar.DAY_OF_MONTH)==date.get(Calendar.DAY_OF_MONTH)-1){
+            if(infosessions.get(i-1).start_time.get(Calendar.DAY_OF_MONTH)==date.get(Calendar.DAY_OF_MONTH)-1){
                 return i+1;
             }
         }
