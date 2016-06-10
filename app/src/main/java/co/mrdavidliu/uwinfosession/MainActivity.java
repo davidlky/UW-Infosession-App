@@ -69,6 +69,9 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //set up data
+        setupCalendar();
+
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -77,9 +80,6 @@ public class MainActivity extends AppCompatActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        //set up data
-        setupCalendar();
     }
 
     @Override
@@ -159,6 +159,8 @@ public class MainActivity extends AppCompatActivity
                     alphabet.put(a[i],alphabet.get(a[i])+alphabet.get(a[i-1]));
                 }
                 adapter = new CustomAdapter(this,infosessions,dates,alphabet);
+
+
             }
         }catch (Exception e){
             Log.d("MainActivity","Getting API - Failed parse string");
@@ -187,40 +189,38 @@ public class MainActivity extends AppCompatActivity
             InfoSession session = new InfoSession();
             try {
                 JSONObject info= (JSONObject) input.get(i);
-                session.id = Integer.parseInt((String) info.get("id"));
+                session.id = info.getInt("id");
                 session.description = (String)info.get("description");
                 session.employer = (String)info.get("employer");
 
-                session.location = (String)info.get("location");
+                JSONObject building = info.getJSONObject("building");
+                session.location = building.getString("code")+" "+ building.getString("room");
                 if(!session.location.equals("")) {
                     Character a = session.employer.charAt(0);
 
                     int count = alphabet.containsKey(a) ? alphabet.get(a) : 0;
                     alphabet.put(a, count + 1);
                     session.website = (String) info.get("website");
-                    session.audience = (String) info.get("audience");
-                    session.programs = (String) info.get("programs");
+                    session.audience = info.getJSONArray("audience").join(",");
+                    session.programs = "";
                     //parse for time and date
                     String[] months = new String[]{
                             "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
                     };
-                    String[] date = ((String) info.get("date")).split(" ");
-                    date[1] = date[1].substring(0, date[1].length() - 1);
+                    String[] date = ((String) info.get("date")).split("-");
                     String time1 = (String) info.get("start_time");
                     String time2 = (String) info.get("end_time");
                     int[] times = new int[]{
-                            Integer.parseInt(time1.substring(0, time1.indexOf(':'))) + ((time1.substring(time1.length() - 2).equals("PM")) ? 12 : 0),
-                            Integer.parseInt(time1.substring(time1.indexOf(':') + 1, time1.indexOf(' '))),
-                            Integer.parseInt(time2.substring(0, time2.indexOf(':'))) + ((time2.substring(time2.length() - 2).equals("PM")) ? 12 : 0),
-                            Integer.parseInt(time2.substring(time2.indexOf(':') + 1, time2.indexOf(' ')))
+                            Integer.parseInt(time1.substring(0, time1.indexOf(':'))),
+                            Integer.parseInt(time1.substring(time1.indexOf(':') + 1)),
+                            Integer.parseInt(time2.substring(0, time2.indexOf(':'))),
+                            Integer.parseInt(time2.substring(time2.indexOf(':') + 1))
                     };
-                    session.start_time = new GregorianCalendar(Integer.parseInt(date[2]), Arrays.asList(months).indexOf(date[0]), Integer.parseInt(date[1]), times[0], times[1]);
-                    session.end_time = new GregorianCalendar(Integer.parseInt(date[2]), session.start_time.get(Calendar.MONTH), Integer.parseInt(date[1]), times[2], times[3]);
+                    session.start_time = new GregorianCalendar(Integer.parseInt(date[0]), Integer.parseInt(date[1])-1, Integer.parseInt(date[2]), times[0], times[1]);
+                    session.end_time = new GregorianCalendar(Integer.parseInt(date[0]), Integer.parseInt(date[1])-1, Integer.parseInt(date[2]), times[2], times[3]);
 
                     session.start_time.set(Calendar.ERA,GregorianCalendar.AD);
-                    session.start_time.set(Calendar.YEAR,Integer.parseInt(date[2]));
                     session.end_time.set(Calendar.ERA,GregorianCalendar.AD);
-                    session.end_time.set(Calendar.YEAR,Integer.parseInt(date[2]));
                     Date currdate = new Date(session.start_time.get(Calendar.YEAR),session.start_time.get(Calendar.MONTH),session.start_time.get(Calendar.DAY_OF_MONTH));
                     if(!calendar_count.containsKey(currdate)) {
                         calendar_count.put(currdate, 1);
@@ -325,6 +325,7 @@ public class MainActivity extends AppCompatActivity
             //setup calendar
             if (getArguments().getInt(ARG_SECTION_NUMBER)==1) {
                 rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
                 ListView lv = (ListView) rootView.findViewById(R.id.info_sessions);
                 lv.setFastScrollEnabled(true);
                 lv.setAdapter(adapter);
@@ -341,6 +342,8 @@ public class MainActivity extends AppCompatActivity
             }else{
                 ((MainActivity)getActivity()).changeList(1);
                 rootView = inflater.inflate(R.layout.fragment_calendar_view, container, false);
+
+
                 ListView lv = (ListView) rootView.findViewById(R.id.info_sessions);
                 lv.setAdapter(adapter);
                 lv.setOverScrollMode(View.OVER_SCROLL_NEVER);
